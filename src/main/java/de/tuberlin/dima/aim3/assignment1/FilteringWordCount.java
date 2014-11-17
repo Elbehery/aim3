@@ -30,6 +30,7 @@ import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.StringTokenizer;
 
 public class FilteringWordCount extends HadoopJob {
 
@@ -51,6 +52,20 @@ public class FilteringWordCount extends HadoopJob {
     @Override
     protected void map(Object key, Text line, Context ctx) throws IOException, InterruptedException {
       // IMPLEMENT ME
+
+      String[] splittedLine= line.toString().split("\\s?[, ]\\s?");
+
+      //String lineString = line.toString();
+      //StringTokenizer lineTokens = new StringTokenizer(lineString);
+
+      for(String str : splittedLine){
+
+          if(!((str.equals("to")) || (str.equals("and")) || (str.equals("in")) || (str.equals("the")))) {
+              ctx.write(new Text(str.toLowerCase()), new IntWritable(1));
+          }
+
+      }
+
     }
   }
 
@@ -59,6 +74,15 @@ public class FilteringWordCount extends HadoopJob {
     protected void reduce(Text key, Iterable<IntWritable> values, Context ctx)
         throws IOException, InterruptedException {
       // IMPLEMENT ME
+        IntWritable result = new IntWritable();
+        int sum = 0;
+
+        for (IntWritable val : values){
+            sum = sum + val.get();
+        }
+
+        result.set(sum);
+        ctx.write(key,result);
     }
   }
 

@@ -33,7 +33,7 @@ import java.util.regex.Pattern;
 
 import static org.junit.Assert.assertEquals;
 
-public class AverageTemperaturePerMonthTest extends HadoopTestCase {
+public class  AverageTemperaturePerMonthTest extends HadoopTestCase {
 
   @Test
   public void countWords() throws Exception {

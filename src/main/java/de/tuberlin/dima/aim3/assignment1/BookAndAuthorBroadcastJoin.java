@@ -18,25 +18,97 @@
 
 package de.tuberlin.dima.aim3.assignment1;
 
+import com.sun.corba.se.spi.orbutil.fsm.Input;
 import de.tuberlin.dima.aim3.HadoopJob;
+import javafx.scene.input.InputMethodTextRun;
+import org.apache.hadoop.filecache.DistributedCache;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.lib.input.FileSplit;
+import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.StringTokenizer;
 
 public class BookAndAuthorBroadcastJoin extends HadoopJob {
 
-  @Override
-  public int run(String[] args) throws Exception {
+    @Override
+    public int run(String[] args) throws Exception {
 
-    Map<String,String> parsedArgs = parseArgs(args);
+        Map<String, String> parsedArgs = parseArgs(args);
 
-    Path authors = new Path(parsedArgs.get("--authors"));
-    Path books = new Path(parsedArgs.get("--books"));
-    Path outputPath = new Path(parsedArgs.get("--output"));
+        Path authors = new Path(parsedArgs.get("--authors"));
+        Path books = new Path(parsedArgs.get("--books"));
+        Path outputPath = new Path(parsedArgs.get("--output"));
 
-    //IMPLEMENT ME
+        //IMPLEMENT ME
 
-    return 0;
-  }
+        Job broadCastJoin = prepareJob(books, outputPath, TextInputFormat.class, BroadCastMapper.class, Text.class, Text.class, TextOutputFormat.class);
+        DistributedCache.addArchiveToClassPath(authors, broadCastJoin.getConfiguration(), FileSystem.getLocal(broadCastJoin.getConfiguration()));
+        broadCastJoin.waitForCompletion(true);
+
+        return 0;
+    }
+
+    static class BroadCastMapper extends Mapper<Object, Text, Text, Text> {
+
+        private Map<String, String> loadedAuthorsMap = new HashMap<String, String>();
+
+        @Override
+        protected void setup(Context context) throws IOException, InterruptedException {
+
+            // Load the Authors inside  map ONCE ONLY
+            BufferedReader bufferedReader = null;
+
+            Path[] loadedAuthors = DistributedCache.getArchiveClassPaths(context.getConfiguration());
+
+            if (loadedAuthors != null || loadedAuthors.length != 0) {
+                try {
+                    bufferedReader = new BufferedReader(new FileReader(loadedAuthors[0].toString()));
+                    String line;
+                    while ((line = bufferedReader.readLine()) != null) {
+
+                        String[] splitAuthorsLine = line.split("\t");
+                        loadedAuthorsMap.put(splitAuthorsLine[0], splitAuthorsLine[1]);
+                    }
+                } finally {
+                    bufferedReader.close();
+                }
+            }
+        }
+
+        @Override
+        protected void map(Object key, Text value, Context context) throws IOException, InterruptedException {
+
+          //((FileSplit) context.getInputSplit()).getPath()
+
+            // perform the join on between authors and books on authors_ID
+            String[] splitBooksLine = value.toString().split("\t");
+            Set<String> authorIds = loadedAuthorsMap.keySet();
+            for (String authorId : authorIds) {
+
+                if (splitBooksLine[0].equals(authorId)) {
+                    context.write(new Text(loadedAuthorsMap.get(authorId).toString()), new Text(splitBooksLine[2] + "\t" + splitBooksLine[1]));
+                }
+
+            }
+
+
+        }
+
+    }
 
 }
+
+

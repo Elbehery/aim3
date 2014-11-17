@@ -23,7 +23,10 @@ import org.apache.hadoop.io.Writable;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 
 public class PrimeNumbersWritable implements Writable {
 
@@ -40,11 +43,24 @@ public class PrimeNumbersWritable implements Writable {
   @Override
   public void write(DataOutput out) throws IOException {
     //IMPLEMENT ME
+    for (int i=0; i<numbers.length; i++){
+        out.write(numbers[i]);
+    }
+    out.write(0);
   }
 
   @Override
   public void readFields(DataInput in) throws IOException {
     //IMPLEMENT ME
+
+      List<Integer> temp = new ArrayList<Integer>();
+      while(true){
+         int x = in.readByte();
+          if(x == 0)
+              break;
+          else temp.add(x);
+      }
+      numbers = convertIntegers(temp);
   }
 
   @Override
@@ -60,4 +76,16 @@ public class PrimeNumbersWritable implements Writable {
   public int hashCode() {
     return Arrays.hashCode(numbers);
   }
+
+
+  public static int[] convertIntegers(List<Integer> integers)
+    {
+        int[] ret = new int[integers.size()];
+        Iterator<Integer> iterator = integers.iterator();
+        for (int i = 0; i < ret.length; i++)
+        {
+            ret[i] = iterator.next().intValue();
+        }
+        return ret;
+    }
 }

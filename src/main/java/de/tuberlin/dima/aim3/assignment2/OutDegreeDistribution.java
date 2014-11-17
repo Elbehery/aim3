@@ -58,12 +58,15 @@ public class OutDegreeDistribution {
         edges.project(0).types(Long.class)
              .groupBy(0).reduceGroup(new DegreeOfVertex());
 
+      verticesWithDegree.writeAsText("/home/mustafa/Documents/aim3/slashdot-zoo/degreeOriginal", FileSystem.WriteMode.OVERWRITE);
+
     /* Compute the degree distribution */
     DataSet<Tuple2<Long, Double>> degreeDistribution =
         verticesWithDegree.groupBy(1).reduceGroup(new DistributionElement())
                                      .withBroadcastSet(numVertices, "numVertices");
 
     degreeDistribution.writeAsText(Config.outputPath(), FileSystem.WriteMode.OVERWRITE);
+     // degreeDistribution.writeAsText("/home/mustafa/Documents/aim3/slashdot-zoo/finalOriginal",FileSystem.WriteMode.OVERWRITE);
 
     env.execute();
   }
