@@ -30,19 +30,19 @@ public class SignedOutDegreeDistribution {
     /* Convert the input to edges, consisting of (source, target, isFriend ) */
         DataSet<Tuple3<Long, Long, Boolean>> edges = input.flatMap(new EdgeReader());
 
+
     /* Create a dataset of all vertex ids and count them */
         DataSet<Long> numVertices =
                 edges.project(0).types(Long.class)
                         .union(edges.project(1).types(Long.class))
                         .distinct().reduceGroup(new CountVertices());
 
+
     /* Compute the degree of every vertex with respect to friendship relation */
         DataSet<Tuple3<Long, Long, String>> verticesWithDegree =
                 edges.project(0,2).types(Long.class, Boolean.class)
                         .groupBy(0,1).reduceGroup(new DegreeOfVertex());
 
-      //  Writing the vertices with friendship degrees
-     //   verticesWithDegree.writeAsText("/home/mustafa/Documents/aim3/slashdot-zoo/VertWithDegree",FileSystem.WriteMode.OVERWRITE);
 
     /* Compute the degree distribution */
         DataSet<Tuple3<Long, Double, String>> degreeDistribution =
@@ -50,7 +50,7 @@ public class SignedOutDegreeDistribution {
                         .withBroadcastSet(numVertices, "numVertices");
 
        degreeDistribution.writeAsText(Config.outputPath(), FileSystem.WriteMode.OVERWRITE);
-       // degreeDistribution.writeAsText("/home/mustafa/Documents/aim3/slashdot-zoo/finalEdited",FileSystem.WriteMode.OVERWRITE);
+
 
         env.execute();
     }
