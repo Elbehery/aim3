@@ -18,18 +18,13 @@
 
 package de.tuberlin.dima.aim3.assignment1;
 
-import com.sun.corba.se.spi.orbutil.fsm.Input;
 import de.tuberlin.dima.aim3.HadoopJob;
-import javafx.scene.input.InputMethodTextRun;
 import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
-import org.apache.hadoop.mapreduce.Reducer;
-import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 
@@ -39,7 +34,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.StringTokenizer;
 
 public class BookAndAuthorBroadcastJoin extends HadoopJob {
 
@@ -91,7 +85,7 @@ public class BookAndAuthorBroadcastJoin extends HadoopJob {
         @Override
         protected void map(Object key, Text value, Context context) throws IOException, InterruptedException {
 
-          //((FileSplit) context.getInputSplit()).getPath()
+            //((FileSplit) context.getInputSplit()).getPath()
 
             // perform the join on between authors and books on authors_ID
             String[] splitBooksLine = value.toString().split("\t");

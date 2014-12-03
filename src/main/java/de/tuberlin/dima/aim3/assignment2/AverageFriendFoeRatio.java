@@ -37,26 +37,26 @@ public class AverageFriendFoeRatio {
                 edges.project(0, 2).types(Long.class, Boolean.class)
                         .groupBy(0, 1).reduceGroup(new DegreeOfVertex());
 
-        verticesWithDegree.writeAsText(Config.outputPath()+"/VertWithDegree", FileSystem.WriteMode.OVERWRITE);
+        verticesWithDegree.writeAsText(Config.outputPath() + "/VertWithDegree", FileSystem.WriteMode.OVERWRITE);
 
 
         // creating dataset with only vertices that have both relationships
         DataSet<Tuple3<Long, Long, String>> verticesWithBothRelations = verticesWithDegree.groupBy(0).reduceGroup(new RelationChecker());
-        verticesWithBothRelations.writeAsText(Config.outputPath()+"/VertWithbothRelation", FileSystem.WriteMode.OVERWRITE);
+        verticesWithBothRelations.writeAsText(Config.outputPath() + "/VertWithbothRelation", FileSystem.WriteMode.OVERWRITE);
 
 
         // creating dataset with each vertex ratio
         DataSet<Tuple3<Long, String, Double>> friendToFoeRatioPerVertex = verticesWithBothRelations.groupBy(0).sortGroup(2, Order.DESCENDING).reduceGroup(new FriendToFoeRatioCalculator());
-        friendToFoeRatioPerVertex.writeAsText(Config.outputPath()+"/friendToFoeRatioPerVertex", FileSystem.WriteMode.OVERWRITE);
+        friendToFoeRatioPerVertex.writeAsText(Config.outputPath() + "/friendToFoeRatioPerVertex", FileSystem.WriteMode.OVERWRITE);
 
 
         //Counting vertices with both relationships
         DataSet<Long> friendAndFoeVerticesNumber = friendToFoeRatioPerVertex.project(0).types(Long.class).distinct().reduceGroup(new VerticesWithBothRelationCounter());
-        friendAndFoeVerticesNumber.writeAsText(Config.outputPath()+"/friendAndFoeVerticesNumber",FileSystem.WriteMode.OVERWRITE);
+        friendAndFoeVerticesNumber.writeAsText(Config.outputPath() + "/friendAndFoeVerticesNumber", FileSystem.WriteMode.OVERWRITE);
 
         //Computing the average ratio
         DataSet<Double> friendToFoeAverageRatio = friendToFoeRatioPerVertex.project(2).types(Double.class).reduceGroup(new FriendToFoeAverageRatioCalculator()).withBroadcastSet(friendAndFoeVerticesNumber, "friendAndFoeVerticesNumber");
-        friendToFoeAverageRatio.writeAsText(Config.outputPath()+"/averageRatio", FileSystem.WriteMode.OVERWRITE);
+        friendToFoeAverageRatio.writeAsText(Config.outputPath() + "/averageRatio", FileSystem.WriteMode.OVERWRITE);
 
         env.execute();
 
@@ -180,7 +180,7 @@ public class AverageFriendFoeRatio {
         }
     }
 
-    public static class FriendToFoeAverageRatioCalculator extends RichGroupReduceFunction<Tuple1<Double>, Double>{
+    public static class FriendToFoeAverageRatioCalculator extends RichGroupReduceFunction<Tuple1<Double>, Double> {
 
         private long friendAndFoeVerticesNumber;
 
@@ -197,11 +197,11 @@ public class AverageFriendFoeRatio {
             double ratiosum = 0.0;
             double average;
 
-            while(iterator.hasNext()){
+            while (iterator.hasNext()) {
                 ratiosum = ratiosum + iterator.next().f0;
             }
 
-            average = ratiosum / (double)friendAndFoeVerticesNumber;
+            average = ratiosum / (double) friendAndFoeVerticesNumber;
 
             out.collect(average);
         }

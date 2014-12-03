@@ -20,17 +20,18 @@ package de.tuberlin.dima.aim3.assignment2;
 
 public class Config {
 
-  private Config() {}
+    private Config() {
+    }
 
-  public static String pathToSlashdotZoo() {
-    return "/home/mustafa/Documents/aim3/slashdot-zoo/out.matrix";
-  }
+    public static String pathToSlashdotZoo() {
+        return "/home/mustafa/Documents/aim3/slashdot-zoo/out.matrix";
+    }
 
-  public static String outputPath() {
-    return "/tmp/flink/";
-  }
+    public static String outputPath() {
+        return "/tmp/flink/";
+    }
 
-  public static long randomSeed() {
-    return 0xdeadbeef;
-  }
+    public static long randomSeed() {
+        return 0xdeadbeef;
+    }
 }

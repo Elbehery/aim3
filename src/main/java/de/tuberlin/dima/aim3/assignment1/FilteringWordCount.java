@@ -30,60 +30,59 @@ import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 
 import java.io.IOException;
 import java.util.Map;
-import java.util.StringTokenizer;
 
 public class FilteringWordCount extends HadoopJob {
 
-  @Override
-  public int run(String[] args) throws Exception {
-    Map<String,String> parsedArgs = parseArgs(args);
-
-    Path inputPath = new Path(parsedArgs.get("--input"));
-    Path outputPath = new Path(parsedArgs.get("--output"));
-
-    Job wordCount = prepareJob(inputPath, outputPath, TextInputFormat.class, FilteringWordCountMapper.class,
-        Text.class, IntWritable.class, WordCountReducer.class, Text.class, IntWritable.class, TextOutputFormat.class);
-    wordCount.waitForCompletion(true);
-
-    return 0;
-  }
-
-  static class FilteringWordCountMapper extends Mapper<Object,Text,Text,IntWritable> {
     @Override
-    protected void map(Object key, Text line, Context ctx) throws IOException, InterruptedException {
-      // IMPLEMENT ME
+    public int run(String[] args) throws Exception {
+        Map<String, String> parsedArgs = parseArgs(args);
 
-      String[] splittedLine= line.toString().split("\\s?[, ]\\s?");
+        Path inputPath = new Path(parsedArgs.get("--input"));
+        Path outputPath = new Path(parsedArgs.get("--output"));
 
-      //String lineString = line.toString();
-      //StringTokenizer lineTokens = new StringTokenizer(lineString);
+        Job wordCount = prepareJob(inputPath, outputPath, TextInputFormat.class, FilteringWordCountMapper.class,
+                Text.class, IntWritable.class, WordCountReducer.class, Text.class, IntWritable.class, TextOutputFormat.class);
+        wordCount.waitForCompletion(true);
 
-      for(String str : splittedLine){
-
-          if(!((str.equals("to")) || (str.equals("and")) || (str.equals("in")) || (str.equals("the")))) {
-              ctx.write(new Text(str.toLowerCase()), new IntWritable(1));
-          }
-
-      }
-
+        return 0;
     }
-  }
 
-  static class WordCountReducer extends Reducer<Text,IntWritable,Text,IntWritable> {
-    @Override
-    protected void reduce(Text key, Iterable<IntWritable> values, Context ctx)
-        throws IOException, InterruptedException {
-      // IMPLEMENT ME
-        IntWritable result = new IntWritable();
-        int sum = 0;
+    static class FilteringWordCountMapper extends Mapper<Object, Text, Text, IntWritable> {
+        @Override
+        protected void map(Object key, Text line, Context ctx) throws IOException, InterruptedException {
+            // IMPLEMENT ME
 
-        for (IntWritable val : values){
-            sum = sum + val.get();
+            String[] splittedLine = line.toString().split("\\s?[, ]\\s?");
+
+            //String lineString = line.toString();
+            //StringTokenizer lineTokens = new StringTokenizer(lineString);
+
+            for (String str : splittedLine) {
+
+                if (!((str.equals("to")) || (str.equals("and")) || (str.equals("in")) || (str.equals("the")))) {
+                    ctx.write(new Text(str.toLowerCase()), new IntWritable(1));
+                }
+
+            }
+
         }
-
-        result.set(sum);
-        ctx.write(key,result);
     }
-  }
+
+    static class WordCountReducer extends Reducer<Text, IntWritable, Text, IntWritable> {
+        @Override
+        protected void reduce(Text key, Iterable<IntWritable> values, Context ctx)
+                throws IOException, InterruptedException {
+            // IMPLEMENT ME
+            IntWritable result = new IntWritable();
+            int sum = 0;
+
+            for (IntWritable val : values) {
+                sum = sum + val.get();
+            }
+
+            result.set(sum);
+            ctx.write(key, result);
+        }
+    }
 
 }

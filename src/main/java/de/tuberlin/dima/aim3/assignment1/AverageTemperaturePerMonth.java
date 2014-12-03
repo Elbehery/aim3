@@ -21,9 +21,7 @@ package de.tuberlin.dima.aim3.assignment1;
 import de.tuberlin.dima.aim3.HadoopJob;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DoubleWritable;
-import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
@@ -32,8 +30,6 @@ import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 
 import java.io.IOException;
 import java.util.Map;
-import java.util.Objects;
-import java.util.StringTokenizer;
 
 public class AverageTemperaturePerMonth extends HadoopJob {
 

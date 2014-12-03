@@ -21,41 +21,35 @@ package de.tuberlin.dima.aim3.assignment1;
 
 import org.junit.Test;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.DataInput;
-import java.io.DataInputStream;
-import java.io.DataOutput;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import java.io.*;
 
 import static org.junit.Assert.assertEquals;
 
 public class PrimeNumbersWritableTest {
 
-  @Test
-  public void writeAndRead() throws IOException {
+    @Test
+    public void writeAndRead() throws IOException {
 
-    PrimeNumbersWritable original1 = new PrimeNumbersWritable(2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47,
-        53, 59, 61, 67, 71, 73, 79, 83, 89, 97);
+        PrimeNumbersWritable original1 = new PrimeNumbersWritable(2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47,
+                53, 59, 61, 67, 71, 73, 79, 83, 89, 97);
 
-    PrimeNumbersWritable original2 = new PrimeNumbersWritable(29, 31, 37);
+        PrimeNumbersWritable original2 = new PrimeNumbersWritable(29, 31, 37);
 
-    ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-    DataOutput out = new DataOutputStream(buffer);
-    original1.write(out);
-    original2.write(out);
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        DataOutput out = new DataOutputStream(buffer);
+        original1.write(out);
+        original2.write(out);
 
-    DataInput in = new DataInputStream(new ByteArrayInputStream(buffer.toByteArray()));
+        DataInput in = new DataInputStream(new ByteArrayInputStream(buffer.toByteArray()));
 
-    PrimeNumbersWritable clone1 = new PrimeNumbersWritable();
-    clone1.readFields(in);
+        PrimeNumbersWritable clone1 = new PrimeNumbersWritable();
+        clone1.readFields(in);
 
-    PrimeNumbersWritable clone2 = new PrimeNumbersWritable();
-    clone2.readFields(in);
+        PrimeNumbersWritable clone2 = new PrimeNumbersWritable();
+        clone2.readFields(in);
 
-    assertEquals(original1, clone1);
-    assertEquals(original2, clone2);
-  }
+        assertEquals(original1, clone1);
+        assertEquals(original2, clone2);
+    }
 
 }

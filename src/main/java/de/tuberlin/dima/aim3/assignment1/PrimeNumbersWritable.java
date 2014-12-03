@@ -30,60 +30,58 @@ import java.util.List;
 
 public class PrimeNumbersWritable implements Writable {
 
-  private int[] numbers;
+    private int[] numbers;
 
-  public PrimeNumbersWritable() {
-    numbers = new int[0];
-  }
-
-  public PrimeNumbersWritable(int... numbers) {
-    this.numbers = numbers;
-  }
-
-  @Override
-  public void write(DataOutput out) throws IOException {
-    //IMPLEMENT ME
-    for (int i=0; i<numbers.length; i++){
-        out.write(numbers[i]);
+    public PrimeNumbersWritable() {
+        numbers = new int[0];
     }
-    out.write(0);
-  }
 
-  @Override
-  public void readFields(DataInput in) throws IOException {
-    //IMPLEMENT ME
-
-      List<Integer> temp = new ArrayList<Integer>();
-      while(true){
-         int x = in.readByte();
-          if(x == 0)
-              break;
-          else temp.add(x);
-      }
-      numbers = convertIntegers(temp);
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (obj instanceof PrimeNumbersWritable) {
-      PrimeNumbersWritable other = (PrimeNumbersWritable) obj;
-      return Arrays.equals(numbers, other.numbers);
+    public PrimeNumbersWritable(int... numbers) {
+        this.numbers = numbers;
     }
-    return false;
-  }
 
-  @Override
-  public int hashCode() {
-    return Arrays.hashCode(numbers);
-  }
+    @Override
+    public void write(DataOutput out) throws IOException {
+        //IMPLEMENT ME
+        for (int i = 0; i < numbers.length; i++) {
+            out.write(numbers[i]);
+        }
+        out.write(0);
+    }
+
+    @Override
+    public void readFields(DataInput in) throws IOException {
+        //IMPLEMENT ME
+
+        List<Integer> temp = new ArrayList<Integer>();
+        while (true) {
+            int x = in.readByte();
+            if (x == 0)
+                break;
+            else temp.add(x);
+        }
+        numbers = convertIntegers(temp);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof PrimeNumbersWritable) {
+            PrimeNumbersWritable other = (PrimeNumbersWritable) obj;
+            return Arrays.equals(numbers, other.numbers);
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(numbers);
+    }
 
 
-  public static int[] convertIntegers(List<Integer> integers)
-    {
+    public static int[] convertIntegers(List<Integer> integers) {
         int[] ret = new int[integers.size()];
         Iterator<Integer> iterator = integers.iterator();
-        for (int i = 0; i < ret.length; i++)
-        {
+        for (int i = 0; i < ret.length; i++) {
             ret[i] = iterator.next().intValue();
         }
         return ret;

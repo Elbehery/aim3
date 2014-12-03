@@ -19,10 +19,7 @@
 package de.tuberlin.dima.aim3.assignment1;
 
 import de.tuberlin.dima.aim3.HadoopJob;
-import org.apache.hadoop.filecache.DistributedCache;
-
 import org.apache.hadoop.fs.Path;
-
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -32,7 +29,6 @@ import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -86,22 +82,20 @@ public class BookAndAuthorReduceSideJoin extends HadoopJob {
             List<String> books = new ArrayList<String>();
             String author = null;
 
-            for (Text val : values){
+            for (Text val : values) {
 
-                String[ ] splitValues = val.toString().split("\t");
-                if(splitValues[1].equals("author") ){
+                String[] splitValues = val.toString().split("\t");
+                if (splitValues[1].equals("author")) {
                     author = splitValues[0];
-                }
-                else{
-                    String temp = splitValues[1]+"\t"+splitValues[0];
+                } else {
+                    String temp = splitValues[1] + "\t" + splitValues[0];
                     books.add(temp);
                 }
             }
 
-            for (String book : books){
+            for (String book : books) {
                 context.write(new Text(author), new Text(book));
             }
-
 
 
         }

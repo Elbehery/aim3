@@ -40,16 +40,16 @@ public class SignedOutDegreeDistribution {
 
     /* Compute the degree of every vertex with respect to friendship relation */
         DataSet<Tuple3<Long, Long, String>> verticesWithDegree =
-                edges.project(0,2).types(Long.class, Boolean.class)
-                        .groupBy(0,1).reduceGroup(new DegreeOfVertex());
+                edges.project(0, 2).types(Long.class, Boolean.class)
+                        .groupBy(0, 1).reduceGroup(new DegreeOfVertex());
 
 
     /* Compute the degree distribution */
         DataSet<Tuple3<Long, Double, String>> degreeDistribution =
-                verticesWithDegree.groupBy(1,2).reduceGroup(new DistributionElement())
+                verticesWithDegree.groupBy(1, 2).reduceGroup(new DistributionElement())
                         .withBroadcastSet(numVertices, "numVertices");
 
-       degreeDistribution.writeAsText(Config.outputPath(), FileSystem.WriteMode.OVERWRITE);
+        degreeDistribution.writeAsText(Config.outputPath(), FileSystem.WriteMode.OVERWRITE);
 
 
         env.execute();
@@ -81,19 +81,18 @@ public class SignedOutDegreeDistribution {
     }
 
 
-    public static class DegreeOfVertex implements GroupReduceFunction<Tuple2<Long,Boolean>, Tuple3<Long, Long, String>> {
+    public static class DegreeOfVertex implements GroupReduceFunction<Tuple2<Long, Boolean>, Tuple3<Long, Long, String>> {
         @Override
-        public void reduce(Iterable<Tuple2<Long,Boolean>> tuples, Collector<Tuple3<Long, Long, String>> collector) throws Exception {
+        public void reduce(Iterable<Tuple2<Long, Boolean>> tuples, Collector<Tuple3<Long, Long, String>> collector) throws Exception {
 
-            Iterator<Tuple2<Long,Boolean>> iterator = tuples.iterator();
+            Iterator<Tuple2<Long, Boolean>> iterator = tuples.iterator();
 
-            Tuple2<Long,Boolean> temp = iterator.next();
+            Tuple2<Long, Boolean> temp = iterator.next();
             Long vertexId = temp.f0;
-            String friend ;
-            if(temp.f1){
+            String friend;
+            if (temp.f1) {
                 friend = "Friend";
-            }
-            else {
+            } else {
                 friend = "Foe";
             }
 
@@ -103,7 +102,7 @@ public class SignedOutDegreeDistribution {
                 count++;
             }
 
-           collector.collect(new Tuple3<Long, Long, String>(vertexId, count, friend));
+            collector.collect(new Tuple3<Long, Long, String>(vertexId, count, friend));
         }
     }
 
@@ -132,7 +131,7 @@ public class SignedOutDegreeDistribution {
                 count++;
             }
 
-            collector.collect(new Tuple3<Long, Double, String>(degree, (double) count / numVertices,friend));
+            collector.collect(new Tuple3<Long, Double, String>(degree, (double) count / numVertices, friend));
         }
     }
 
