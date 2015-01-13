@@ -30,7 +30,7 @@ import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.core.fs.FileSystem;
 
-import java.util.Map;
+import java.util.*;
 
 public class Classification {
 
@@ -52,6 +52,17 @@ public class Classification {
 
     classifiedDataPoints.writeAsCsv(Config.pathToOutput(), "\n", "\t", FileSystem.WriteMode.OVERWRITE);
 
+
+    // secretTest part
+    DataSource<String> secretTestData = env.readTextFile(Config.pathToSecretTestSet());
+
+    DataSet<Tuple3<String, String, Double>> secretClassifiedDataPoints = secretTestData.map(new Classifier())
+              .withBroadcastSet(conditionals, "conditionals")
+              .withBroadcastSet(sums, "sums");
+
+    secretClassifiedDataPoints.writeAsCsv(Config.pathToSecretTestSetOutPut(), "\n", "\t", FileSystem.WriteMode.OVERWRITE);
+
+    env.setDegreeOfParallelism(1);
     env.execute();
   }
 
@@ -84,6 +95,31 @@ public class Classification {
        super.open(parameters);
 
        // IMPLEMENT ME
+         Collection globalConditionals = getRuntimeContext().getBroadcastVariable("conditionals");
+
+         Iterator globalConditionalsIterator = globalConditionals.iterator();
+
+         while(globalConditionalsIterator.hasNext()){
+             Tuple3<String, String, Long> tuple3 = (Tuple3<String, String, Long>)globalConditionalsIterator.next();
+             if(!wordCounts.containsKey(tuple3.f0)){
+                 Map<String, Long> map = new HashMap<String, Long>();
+                 map.put(tuple3.f1,tuple3.f2);
+                 wordCounts.put(tuple3.f0,map);
+             }
+
+             else
+                 wordCounts.get(tuple3.f0).put(tuple3.f1,tuple3.f2);
+         }
+
+
+         Collection globalWordSum = getRuntimeContext().getBroadcastVariable("sums");
+
+         Iterator globalWordSumIterator = globalWordSum.iterator();
+
+         while(globalWordSumIterator.hasNext()){
+             Tuple2<String, Long> tuple2 = (Tuple2<String, Long>)globalWordSumIterator.next();
+             wordSums.put(tuple2.f0,tuple2.f1);
+         }
      }
 
      @Override
@@ -96,7 +132,39 @@ public class Classification {
        double maxProbability = Double.NEGATIVE_INFINITY;
        String predictionLabel = "";
 
-       // IMPLEMENT ME
+         // IMPLEMENT ME
+
+         double wordCountPerLabel = 0;
+         double totalWordsCountPerLabel= 0;
+         double k = Config.getSmoothingParameter();
+         double labelProbability;
+
+
+        Iterator iterator = wordCounts.entrySet().iterator();
+
+         while (iterator.hasNext()) {
+
+             Map.Entry pairs = (Map.Entry)iterator.next();
+             String key = (String)pairs.getKey();
+             labelProbability = 0;
+
+             for (String term : terms) {
+                if(wordCounts.get(key).containsKey(term)) {
+
+                    wordCountPerLabel = wordCounts.get(key).get(term);
+                    totalWordsCountPerLabel = wordSums.get(key);
+                    labelProbability = labelProbability + Math.log( (double) (wordCountPerLabel + k) / (double) (totalWordsCountPerLabel + k));
+                }
+                 else
+                    labelProbability = labelProbability + Math.log(  (double)(0+k) / (double) (totalWordsCountPerLabel + k));
+
+             }
+
+             if(labelProbability > maxProbability){
+                 maxProbability = labelProbability;
+                 predictionLabel = key;
+             }
+         }
 
        return new Tuple3<String, String, Double>(label, predictionLabel, maxProbability);
      }

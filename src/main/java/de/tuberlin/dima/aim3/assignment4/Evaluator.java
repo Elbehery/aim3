@@ -26,6 +26,8 @@ import org.apache.flink.api.java.operators.DataSource;
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.util.Collector;
 
+import java.util.Iterator;
+
 
 public class Evaluator {
 
@@ -62,7 +64,18 @@ public class Evaluator {
 
       double accuracy = 0.0;
 
-      // IMPLEMENT ME
+      // IMPLEMENT ME\
+      Iterator predictionsIterator = predictions.iterator();
+
+      while (predictionsIterator.hasNext()){
+        Tuple3<String, String, Double> prediction = (Tuple3<String, String, Double>)predictionsIterator.next();
+        if(prediction.f0.equals(prediction.f1)){
+          correct++;
+        }
+        total++;
+      }
+
+      accuracy = (correct/total) * 100 ;
 
       collector.collect("Classifier achieved: " + accuracy + " % accuracy");
     }

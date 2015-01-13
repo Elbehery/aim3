@@ -19,6 +19,7 @@
 package de.tuberlin.dima.aim3.assignment4;
 
 import org.apache.flink.api.common.functions.FlatMapFunction;
+import org.apache.flink.api.common.functions.GroupReduceFunction;
 import org.apache.flink.api.java.DataSet;
 import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.api.java.operators.DataSource;
@@ -26,6 +27,9 @@ import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.core.fs.FileSystem;
 import org.apache.flink.util.Collector;
+
+import java.util.ArrayList;
+import java.util.Iterator;
 
 
 public class Training {
@@ -40,15 +44,17 @@ public class Training {
     DataSet<Tuple3<String, String, Long>> labeledTerms = input.flatMap(new DataReader());
 
     // conditional counter per word per label
-    DataSet<Tuple3<String, String, Long>> termCounts = null; // IMPLEMENT ME
+    DataSet<Tuple3<String, String, Long>> termCounts = labeledTerms.groupBy(0,1).sum(2); // IMPLEMENT ME
 
     termCounts.writeAsCsv(Config.pathToConditionals(), "\n", "\t", FileSystem.WriteMode.OVERWRITE);
 
     // word counts per label
-    DataSet<Tuple2<String, Long>> termLabelCounts = null; // IMPLEMENT ME
+    DataSet<Tuple2<String, Long>> termLabelCounts = termCounts.project(0,2).types(String.class,Long.class).groupBy(0).sum(1); // IMPLEMENT ME
 
     termLabelCounts.writeAsCsv(Config.pathToSums(), "\n", "\t", FileSystem.WriteMode.OVERWRITE);
 
+ //   termLabelCounts.print();
+ //   env.setDegreeOfParallelism(1);
     env.execute();
   }
 
@@ -65,4 +71,8 @@ public class Training {
       }
     }
   }
+
+
+
 }
+
